@@ -125,118 +125,138 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return new Center(
-      child: new LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-        return new Container(
-          height: widget.width,
-          width: widget.width,
-          alignment: Alignment.center,
-          child: new Stack(fit: StackFit.expand, children: <Widget>[
-            widget.isCircle == true
-                ? new Container(
-                    height: constraints.maxWidth,
-                    width: constraints.maxWidth,
-                    padding: widget.padding,
-                    child: new CustomPaint(
-                        foregroundPainter: new LinePainter(
-                            lineColor: this.widget.backgroundColor,
-                            completeColor: this.widget.circleColor,
-                            startValue: this.start,
-                            endValue: this.end,
-                            startPercent: this.widget.highlightStart,
-                            endPercent: this.widget.highlightEnd,
-                            width: this.widget.widthCircle,
-                            value: this.val)),
-                  )
-                : SizedBox(),
-            widget.hand == Hand.none || widget.hand == Hand.short
-                ? SizedBox()
-                : new Center(
-                    child: new Container(
-                      width: widget.handSize,
-                      height: widget.handSize,
-                      decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: this.widget.indicatorColor,
-                      ),
-                    ),
-                  ),
-            Container(
-              height: constraints.maxWidth,
-              width: constraints.maxWidth,
-//                      alignment: Alignment.center,
-              padding: EdgeInsets.only(
-                top: widget.hand == Hand.short
-                    ? widget.widthCircle
-                    : widget.widthCircle,
-                bottom: widget.widthCircle,
-                right: widget.widthCircle,
-                left: widget.widthCircle,
-              ),
-              child: new CustomPaint(
-                  painter: new GaugeTextPainter(
-                      numberInAndOut: widget.numberInAndOut,
-                      secondsMarker: widget.secondsMarker,
-                      number: widget.number,
-                      inactiveColor: widget.inactiveColor,
-                      activeColor: widget.activeColor,
-                      start: this.start,
-                      end: this.end,
-                      value: this.val,
-                      fontFamily: widget.fontFamily,
-//                              color: this.widget.colorHourHand,
-                      widthCircle: widget.widthCircle,
-                      textStyle: widget.textStyle == null
-                          ? TextStyle(
-                              color: Colors.black,
-                              fontSize: 15.0,
-                              fontFamily: widget.fontFamily)
-                          : widget.textStyle)),
+  Widget build(BuildContext context) => Center(
+        child: LayoutBuilder(
+          builder: (
+            BuildContext context,
+            BoxConstraints constraints,
+          ) =>
+              Container(
+            height: widget.width,
+            width: widget.width,
+            alignment: Alignment.center,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                ..._buildCircle(context, constraints),
+                ..._buildGaugeText(context, constraints),
+                ..._buildHand(context, constraints),
+                ..._buildCounter(context, constraints),
+              ],
             ),
-            widget.hand != Hand.none
-                ? new Center(
-                    child: new Container(
-                    height: constraints.maxWidth,
-                    width: constraints.maxWidth,
-                    padding: EdgeInsets.all(widget.hand == Hand.short
-                        ? widget.widthCircle / 1.5
-                        : widget.paddingHand),
-                    child: new CustomPaint(
-                      painter: new HandPainter(
-                          shadowHand: widget.shadowHand,
-                          hand: widget.hand,
-                          value: val,
-                          start: this.start,
-                          end: this.end,
-                          color: this.widget.handColor,
-                          handSize: widget.handSize),
-                    ),
-                  ))
-                : SizedBox(),
-            Container(
-              child: widget.counterAlign != CounterAlign.none
-                  ? new CustomPaint(
-                      painter: new GaugeTextCounter(
-                          isDecimal: widget.isDecimal,
-                          start: this.start,
-                          width: widget.widthCircle,
-                          counterAlign: widget.counterAlign,
-                          end: this.end,
-                          value: this.val,
-                          fontFamily: widget.fontFamily,
-                          textStyle: widget.counterStyle == null
-                              ? TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 17.0,
-                                  fontFamily: widget.fontFamily)
-                              : widget.counterStyle))
-                  : SizedBox(),
-            )
-          ]),
-        );
-      }),
-    );
-  }
+          ),
+        ),
+      );
+
+  List<Widget> _buildCircle(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) =>
+      [
+        if (widget.isCircle)
+          Container(
+            height: constraints.maxWidth,
+            width: constraints.maxWidth,
+            padding: widget.padding,
+            child: new CustomPaint(
+                foregroundPainter: new LinePainter(
+                    lineColor: this.widget.backgroundColor,
+                    completeColor: this.widget.circleColor,
+                    startValue: this.start,
+                    endValue: this.end,
+                    startPercent: this.widget.highlightStart,
+                    endPercent: this.widget.highlightEnd,
+                    width: this.widget.widthCircle,
+                    value: this.val)),
+          )
+      ];
+
+  List<Widget> _buildCounter(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) =>
+      [
+        if (widget.counterAlign != CounterAlign.none)
+          CustomPaint(
+              painter: GaugeTextCounter(
+                  isDecimal: widget.isDecimal,
+                  start: this.start,
+                  width: widget.widthCircle,
+                  counterAlign: widget.counterAlign,
+                  end: this.end,
+                  value: this.val,
+                  fontFamily: widget.fontFamily,
+                  textStyle: widget.counterStyle == null
+                      ? TextStyle(
+                          color: Colors.black,
+                          fontSize: 17.0,
+                          fontFamily: widget.fontFamily)
+                      : widget.counterStyle))
+      ];
+
+  List<Widget> _buildGaugeText(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) =>
+      [
+        Container(
+          height: constraints.maxWidth,
+          width: constraints.maxWidth,
+//                      alignment: Alignment.center,
+          padding: EdgeInsets.all(widget.widthCircle),
+          child: CustomPaint(
+            painter: GaugeTextPainter(
+                numberInAndOut: widget.numberInAndOut,
+                secondsMarker: widget.secondsMarker,
+                number: widget.number,
+                inactiveColor: widget.inactiveColor,
+                activeColor: widget.activeColor,
+                start: this.start,
+                end: this.end,
+                value: this.val,
+                fontFamily: widget.fontFamily,
+//                              color: this.widget.colorHourHand,
+                widthCircle: widget.widthCircle,
+                textStyle: widget.textStyle == null
+                    ? TextStyle(
+                        color: Colors.black,
+                        fontSize: 15.0,
+                        fontFamily: widget.fontFamily)
+                    : widget.textStyle),
+          ),
+        )
+      ];
+
+  List<Widget> _buildHand(BuildContext context, BoxConstraints constraints) => [
+        if (!(widget.hand == Hand.none || widget.hand == Hand.short))
+          Center(
+            child: Container(
+              width: widget.handSize,
+              height: widget.handSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: this.widget.indicatorColor,
+              ),
+            ),
+          ),
+        if (widget.hand != Hand.none)
+          Center(
+              child: Container(
+            height: constraints.maxWidth,
+            width: constraints.maxWidth,
+            padding: EdgeInsets.all(widget.hand == Hand.short
+                ? widget.widthCircle / 1.5
+                : widget.paddingHand),
+            child: new CustomPaint(
+              painter: new HandPainter(
+                  shadowHand: widget.shadowHand,
+                  hand: widget.hand,
+                  value: val,
+                  start: this.start,
+                  end: this.end,
+                  color: this.widget.handColor,
+                  handSize: widget.handSize),
+            ),
+          )),
+      ];
 }
