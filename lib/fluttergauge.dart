@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gauge/handpainter.dart';
 import 'package:flutter_gauge/linepainter.dart';
@@ -13,43 +11,34 @@ import 'flutter_gauge.dart';
 import 'gaugetextpainter.dart';
 
 class FlutterGaugeMain extends StatefulWidget {
-  int start;
-  int end;
-  double highlightStart;
-  double highlightEnd;
-//  ThemeData themeData;
-  String fontFamily;
-  double widthCircle;
-  PublishSubject<double> eventObservable;
-  Number number;
-  CounterAlign counterAlign;
-  Hand hand;
-  bool isCircle;
-  Map isMark;
-  double handSize;
-  SecondsMarker secondsMarker;
-  double shadowHand;
-  Color circleColor;
-  Color handColor;
-  Color backgroundColor;
-  Color indicatorColor;
-  double paddingHand;
-  double width;
-  NumberInAndOut numberInAndOut;
-  TextStyle counterStyle;
-  TextStyle textStyle;
+  final int start;
+  final int end;
+  final double highlightStart;
+  final double highlightEnd;
+  final String fontFamily;
+  final double widthCircle;
+  final PublishSubject<double> eventObservable;
+  final CounterAlign counterAlign;
+  final Hand hand;
+  final bool isCircle;
+  final Map isMark;
+  final double handSize;
+  final double shadowHand;
+  final Color circleColor;
+  final Color handColor;
+  final Color backgroundColor;
+  final Color indicatorColor;
+  final double paddingHand;
+  final double width;
+  final TextStyle counterStyle;
+  final bool isDecimal;
+  final List<Tick> ticks;
+
   EdgeInsets padding;
-  Color inactiveColor;
-  Color activeColor;
-  bool isDecimal;
 
   FlutterGaugeMain({
     this.isDecimal,
-    this.inactiveColor,
-    this.activeColor,
-    this.textStyle,
     this.counterStyle,
-    this.numberInAndOut,
     this.width,
     this.paddingHand = 30.0,
     this.circleColor = Colors.cyan,
@@ -58,14 +47,13 @@ class FlutterGaugeMain extends StatefulWidget {
     this.indicatorColor = Colors.black,
     this.shadowHand = 4.0,
     this.counterAlign = CounterAlign.bottom,
-    this.number = Number.all,
     this.isCircle = true,
     this.hand = Hand.long,
-    this.secondsMarker = SecondsMarker.all,
     this.isMark,
     this.handSize = 30,
     this.start,
     this.end,
+    this.ticks,
     this.highlightStart,
     this.highlightEnd,
     this.eventObservable,
@@ -202,27 +190,12 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
         Container(
           height: constraints.maxWidth,
           width: constraints.maxWidth,
-//                      alignment: Alignment.center,
           padding: EdgeInsets.all(widget.widthCircle),
           child: CustomPaint(
             painter: GaugeTextPainter(
-                numberInAndOut: widget.numberInAndOut,
-                secondsMarker: widget.secondsMarker,
-                number: widget.number,
-                inactiveColor: widget.inactiveColor,
-                activeColor: widget.activeColor,
-                start: this.start,
-                end: this.end,
-                value: this.val,
-                fontFamily: widget.fontFamily,
-//                              color: this.widget.colorHourHand,
-                widthCircle: widget.widthCircle,
-                textStyle: widget.textStyle == null
-                    ? TextStyle(
-                        color: Colors.black,
-                        fontSize: 15.0,
-                        fontFamily: widget.fontFamily)
-                    : widget.textStyle),
+              widthCircle: widget.widthCircle,
+              ticks: widget.ticks,
+            ),
           ),
         )
       ];
