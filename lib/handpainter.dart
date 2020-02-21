@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_gauge/flutter_gauge.dart';
 
-import 'fluttergauge.dart';
-
 class HandPainter extends CustomPainter {
   final Paint minuteHandPaint;
   double value;

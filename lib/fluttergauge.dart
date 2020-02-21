@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -29,7 +30,6 @@ class FlutterGaugeMain extends StatefulWidget {
   final Color backgroundColor;
   final Color indicatorColor;
   final double paddingHand;
-  final double width;
   final TextStyle counterStyle;
   final bool isDecimal;
   final List<Tick> ticks;
@@ -39,7 +39,6 @@ class FlutterGaugeMain extends StatefulWidget {
   FlutterGaugeMain({
     this.isDecimal,
     this.counterStyle,
-    this.width,
     this.paddingHand = 30.0,
     this.circleColor = Colors.cyan,
     this.handColor = Colors.black,
@@ -95,8 +94,9 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
     this.eventObservable = eventObservable;
 
     percentageAnimationController = new AnimationController(
-        vsync: this, duration: new Duration(milliseconds: 1000))
-      ..addListener(() {
+      vsync: this,
+      duration: new Duration(milliseconds: 1000),
+    )..addListener(() {
         setState(() {
           val = lerpDouble(val, newVal, percentageAnimationController.value);
         });
@@ -115,25 +115,38 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
   @override
   Widget build(BuildContext context) => Center(
         child: LayoutBuilder(
-          builder: (
-            BuildContext context,
-            BoxConstraints constraints,
-          ) =>
-              Container(
-            height: widget.width,
-            width: widget.width,
+            builder: (BuildContext context, BoxConstraints constraints) {
+          final size = _getSize(constraints);
+
+          final ringWidth = size.width - widget.widthCircle;
+          return Container(
+            height: size.height,
+            width: size.width,
+            color: Colors.amber,
             alignment: Alignment.center,
             child: Stack(
+              alignment: Alignment.bottomCenter,
               fit: StackFit.expand,
               children: <Widget>[
-                ..._buildCircle(context, constraints),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    color: Colors.green,
+                    width: ringWidth,
+                    height: ringWidth / 2,
+                    child: Stack(
+                      fit: StackFit.passthrough,
+                      children: _buildCircle(context, constraints),
+                    ),
+                  ),
+                ),
                 ..._buildGaugeText(context, constraints),
                 ..._buildHand(context, constraints),
                 ..._buildCounter(context, constraints),
               ],
             ),
-          ),
-        ),
+          );
+        }),
       );
 
   List<Widget> _buildCircle(
@@ -141,22 +154,11 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
     BoxConstraints constraints,
   ) =>
       [
-        if (widget.isCircle)
-          Container(
-            height: constraints.maxWidth,
-            width: constraints.maxWidth,
-            padding: widget.padding,
-            child: new CustomPaint(
-                foregroundPainter: new LinePainter(
-                    lineColor: this.widget.backgroundColor,
-                    completeColor: this.widget.circleColor,
-                    startValue: this.start,
-                    endValue: this.end,
-                    startPercent: this.widget.highlightStart,
-                    endPercent: this.widget.highlightEnd,
-                    width: this.widget.widthCircle,
-                    value: this.val)),
-          )
+        CustomPaint(
+            foregroundPainter: new LinePainter(
+          lineColor: this.widget.backgroundColor,
+          width: widget.widthCircle,
+        )),
       ];
 
   List<Widget> _buildCounter(
@@ -169,7 +171,7 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
               painter: GaugeTextCounter(
                   isDecimal: widget.isDecimal,
                   start: this.start,
-                  width: widget.widthCircle,
+                  width: min(constraints.maxHeight, constraints.maxWidth),
                   counterAlign: widget.counterAlign,
                   end: this.end,
                   value: this.val,
@@ -232,4 +234,24 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
             ),
           )),
       ];
+}
+
+Size _getSize(BoxConstraints constraints) {
+  if (constraints.maxHeight.isInfinite) {
+    if (constraints.maxWidth.isInfinite) {
+      return null;
+    }
+
+    return Size(constraints.maxWidth, constraints.maxWidth / 2);
+  } else if (constraints.maxWidth.isInfinite) {
+    if (constraints.maxHeight.isInfinite) {
+      return null;
+    }
+
+    return Size(constraints.maxHeight * 2, constraints.maxHeight);
+  } else {
+    return constraints.maxHeight * 2 < constraints.maxWidth
+        ? Size(constraints.maxHeight * 2, constraints.maxHeight)
+        : Size(constraints.maxWidth, constraints.maxWidth / 2);
+  }
 }

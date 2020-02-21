@@ -6,6 +6,8 @@ import 'package:flutter_gauge/fluttergauge.dart';
 import 'package:flutter_gauge/gaugetextpainter.dart';
 import 'package:rxdart/rxdart.dart';
 
+export 'package:flutter_gauge/gaugetextpainter.dart';
+
 enum SecondsMarker { minutes, secondsAndMinute, all, none, seconds }
 
 enum Number {
@@ -115,13 +117,6 @@ class _FlutterGaugeState extends State<FlutterGauge> {
             eventObservable: eventObservable,
             fontFamily: widget.fontFamily,
             widthCircle: widget.widthCircle > 30 ? 30 : widget.widthCircle,
-            width: (widget.width == null
-                ? MediaQuery.of(context).size.width / 2
-                : widget.width < (MediaQuery.of(context).size.width / 2)
-                    ? (MediaQuery.of(context).size.width / 2)
-                    : (widget.width > (MediaQuery.of(context).size.width)
-                        ? MediaQuery.of(context).size.width
-                        : widget.width)),
           ),
         ],
       );

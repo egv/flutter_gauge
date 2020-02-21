@@ -43,6 +43,14 @@ class Tick {
   /// Position to draw text
   final NumberInAndOut numberInAndOut;
 
+  double get calcWidth {
+    final textPainter = _makeTextPainter();
+
+    textPainter.layout();
+
+    return textPainter.width;
+  }
+
   Tick({
     this.percent,
     this.color,
@@ -53,10 +61,10 @@ class Tick {
     this.numberInAndOut,
   });
 
-  static List<Tick> allGreyNoNumbers() => List<int>.generate(100, (i) => i + 1)
+  static List<Tick> allGreyNoNumbers() => List<int>.generate(101, (i) => i + 1)
       .map(
         (i) => Tick(
-          percent: i * 0.01,
+          percent: (i - 1) * 0.01,
           color: Colors.white38,
           width: TickWidth.thin,
           length: TickLength.long,
@@ -66,10 +74,30 @@ class Tick {
         ),
       )
       .toList();
+
+  static List<Tick> testTicks() {
+    var ticks = <Tick>[];
+    // сперва зарубки внутренние для зарработка
+    ticks += List<int>.generate(5, (i) => i + 1)
+        .map((i) => Tick(
+              percent: (i - 1) * 0.25,
+              position: TickPosition.inside,
+              length: TickLength.short,
+              width: TickWidth.thin,
+              color: Colors.black,
+              text: "${2500 * (i - 1)}",
+              numberInAndOut: NumberInAndOut.inside,
+            ))
+        .toList();
+    // теперь внешние для процентов
+
+    return ticks;
+  }
 }
 
 class GaugeTextPainter extends CustomPainter {
   final Paint tickPaint;
+  // final double radius;
   final TextPainter textPainter;
 
   final double widthCircle;
@@ -77,12 +105,10 @@ class GaugeTextPainter extends CustomPainter {
 
   GaugeTextPainter({
     this.widthCircle,
+    // this.radius,
     this.ticks,
-  })  : tickPaint = new Paint(),
-        textPainter = new TextPainter(
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.rtl,
-        );
+  })  : tickPaint = Paint(),
+        textPainter = _makeTextPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -90,7 +116,6 @@ class GaugeTextPainter extends CustomPainter {
       return;
     }
 
-    final angle = ((2 / 3) * 2) * pi / 100;
     final radius = (size.width / 2);
 
     canvas.save();
@@ -98,7 +123,7 @@ class GaugeTextPainter extends CustomPainter {
 
     for (Tick tick in ticks) {
       canvas.save();
-      canvas.rotate(-2.1 + angle * tick.percent * 100);
+      canvas.rotate(-pi / 2 + pi * tick.percent);
       tickPaint.color = Colors.red; //tick.color;
       tickPaint.strokeWidth = tick.width == TickWidth.thin ? 1.0 : 2.0;
 
@@ -255,3 +280,8 @@ class GaugeTextCounter extends CustomPainter {
     return false;
   }
 }
+
+TextPainter _makeTextPainter() => TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+    );

@@ -29,9 +29,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: EdgeInsets.only(right: 60),
             child: FlutterGauge(
+              width: MediaQuery.of(context).size.width,
               index: 50,
               hand: Hand.short,
-              ticks: Tick.allGreyNoNumbers(),
+              ticks: Tick.testTicks(),
               counterStyle: TextStyle(
                 color: Colors.black,
                 fontSize: 25,
