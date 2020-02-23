@@ -43,8 +43,19 @@ class Tick {
   /// Position to draw text
   final NumberInAndOut numberInAndOut;
 
+  /// Style of text to draw tick text with [TextStyle] object
+  final TextStyle textStyle;
+
   double get calcWidth {
+    if (text == null || text.trim().isEmpty) {
+      return 0.0;
+    }
+
     final textPainter = _makeTextPainter();
+    textPainter.text = new TextSpan(
+      text: text,
+      style: TextStyle(backgroundColor: Colors.red, fontSize: 12),
+    );
 
     textPainter.layout();
 
@@ -58,6 +69,7 @@ class Tick {
     this.length,
     this.position,
     this.text,
+    this.textStyle,
     this.numberInAndOut,
   });
 
@@ -75,18 +87,21 @@ class Tick {
       )
       .toList();
 
-  static List<Tick> testTicks() {
+  static List<Tick> testTicks({
+    TickPosition tickPosition = TickPosition.outside,
+    NumberInAndOut textPostion = NumberInAndOut.outside,
+  }) {
     var ticks = <Tick>[];
     // сперва зарубки внутренние для зарработка
     ticks += List<int>.generate(5, (i) => i + 1)
         .map((i) => Tick(
               percent: (i - 1) * 0.25,
-              position: TickPosition.inside,
+              position: tickPosition,
               length: TickLength.short,
               width: TickWidth.thin,
               color: Colors.black,
               text: "${2500 * (i - 1)}",
-              numberInAndOut: NumberInAndOut.inside,
+              numberInAndOut: textPostion,
             ))
         .toList();
     // теперь внешние для процентов
@@ -97,7 +112,7 @@ class Tick {
 
 class GaugeTextPainter extends CustomPainter {
   final Paint tickPaint;
-  // final double radius;
+  final double radius;
   final TextPainter textPainter;
 
   final double widthCircle;
@@ -105,7 +120,7 @@ class GaugeTextPainter extends CustomPainter {
 
   GaugeTextPainter({
     this.widthCircle,
-    // this.radius,
+    this.radius,
     this.ticks,
   })  : tickPaint = Paint(),
         textPainter = _makeTextPainter();
@@ -116,18 +131,14 @@ class GaugeTextPainter extends CustomPainter {
       return;
     }
 
-    final radius = (size.width / 2);
-
-    canvas.save();
-    canvas.translate(radius, radius);
-
     for (Tick tick in ticks) {
       canvas.save();
+      canvas.translate(size.width / 2, size.height);
       canvas.rotate(-pi / 2 + pi * tick.percent);
       tickPaint.color = Colors.red; //tick.color;
       tickPaint.strokeWidth = tick.width == TickWidth.thin ? 1.0 : 2.0;
 
-      final len = tick.length == TickLength.long ? 20 : 10;
+      final len = _getLenght(tick.length, widthCircle);
       var o1 = 0.0;
       var o2 = 0.0;
 
@@ -143,8 +154,8 @@ class GaugeTextPainter extends CustomPainter {
           break;
 
         case TickPosition.above:
-          o1 = len / 2;
-          o2 = -len / 2;
+          o1 = -widthCircle / 2;
+          o2 = widthCircle / 2;
           break;
       }
 
@@ -154,40 +165,45 @@ class GaugeTextPainter extends CustomPainter {
         tickPaint,
       );
 
+      canvas.restore();
       if (tick.text != null && tick.text.isNotEmpty) {
         canvas.save();
+        canvas.translate(size.width / 2, size.height);
+
+        var r = 0.0;
         if (tick.numberInAndOut == NumberInAndOut.inside) {
           if (tick.position == TickPosition.inside) {
-            canvas.translate(0.0, -radius + widthCircle + len);
+            r = -radius + widthCircle / 2 + len;
           } else {
-            canvas.translate(0.0, -radius + widthCircle);
+            r = -radius + widthCircle / 2;
           }
-          canvas.rotate(-pi / 2);
         } else {
           if (tick.position == TickPosition.outside) {
-            canvas.translate(0.0, -radius - widthCircle - len);
+            r = -radius - widthCircle / 2 - len;
           } else {
-            canvas.translate(0.0, -radius - widthCircle);
+            r = -radius - widthCircle / 2;
           }
-          canvas.rotate(pi / 2);
         }
 
+        final a = pi - pi * (1 - tick.percent);
+        canvas.translate(r * cos(a), r * sin(a));
+
+        // Для нашей ситуации, когда мы хотим писать текст строго горизонтально,
+        // нам надо учитывать, в какой четверти мы его рисуем чтобы правильно задавать
+        // выравнивание и направление текста
         textPainter.text = new TextSpan(
           text: tick.text,
-          style: TextStyle(backgroundColor: Colors.red, fontSize: 12),
+          style: tick.textStyle ??
+              TextStyle(backgroundColor: Colors.red, fontSize: 12),
         );
 
         textPainter.layout();
 
-        textPainter.paint(
-          canvas,
-          new Offset(-(textPainter.width / 2) - 5, -(textPainter.height / 2)),
-        );
+        textPainter.paint(canvas, _getOffset(tick, textPainter));
+
         canvas.restore();
       }
-      canvas.restore();
     }
-    canvas.restore();
   }
 
   @override
@@ -196,92 +212,44 @@ class GaugeTextPainter extends CustomPainter {
   }
 }
 
-///counter text bottom
-class GaugeTextCounter extends CustomPainter {
-  final hourTickMarkLength = 30.0;
-  final minuteTickMarkLength = 0.0;
-
-  final hourTickMarkWidth = 1.5;
-  final minuteTickMarkWidth = 1.0;
-
-  final Paint tickPaint;
-  final TextPainter textPainter;
-  final TextStyle textStyle;
-
-  int end;
-  int start;
-  double value;
-  String fontFamily;
-  CounterAlign counterAlign;
-  double width;
-  bool isDecimal;
-
-  GaugeTextCounter({
-    this.isDecimal,
-    this.width,
-    this.counterAlign,
-    this.start,
-    this.end,
-    this.value,
-    this.fontFamily,
-    this.textStyle,
-  })  : tickPaint = new Paint(),
-        textPainter = new TextPainter(
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.rtl,
-        ) {
-    tickPaint.color = Colors.green;
-  }
-  @override
-  void paint(Canvas canvas, Size size) {
-    final angle = 2 * pi / 60;
-    final radius = size.width / 2;
-    canvas.save();
-    canvas.translate(radius, radius);
-    for (var i = 0; i <= 60; i++) {
-      if (i == 30) {
-        String label;
-
-        if (isDecimal == true) {
-          label = this.value.toStringAsFixed(1);
-        } else {
-          label = (this.value.toInt()).toString();
-        }
-
-        canvas.save();
-
-        if (counterAlign == CounterAlign.bottom) {
-          canvas.translate(0.0, -radius + (60));
-        } else if (counterAlign == CounterAlign.top) {
-          canvas.translate(0.0, radius - (40));
-        }
-
-        textPainter.text = new TextSpan(text: label, style: textStyle);
-        canvas.rotate(-angle * i);
-
-        textPainter.layout();
-
-        textPainter.paint(
-            canvas,
-            new Offset(-(textPainter.width / 2),
-                counterAlign == CounterAlign.center ? -width : 0));
-
-        canvas.restore();
-      }
-
-      canvas.rotate(angle);
-    }
-
-    canvas.restore();
+/// Calculates offset for painting text using given textpainter
+/// for given tick
+///
+/// @param tick - [Tick] to calculate offset for
+/// @param painter - [TextPainter] to calculate offset for. It should be already layed out
+///
+/// @return [Offset] to be passed to [Texpainter.paint] method
+Offset _getOffset(Tick tick, TextPainter painter) {
+  if (tick.percent == 0.5) {
+    // мы на самом верху, рисуем текст посередине
+    return Offset(-painter.width / 2,
+        tick.numberInAndOut == NumberInAndOut.outside ? -painter.height : 0.0);
   }
 
-  @override
-  bool shouldRepaint(GaugeTextCounter oldDelegate) {
-    return false;
+  if (tick.percent < 0.5) {
+    if (tick.percent > .05)
+      return Offset(
+          tick.position == TickPosition.outside ? -painter.width : 0.0,
+          tick.position == TickPosition.outside ? -painter.height : 0.0);
+    else
+      return Offset(
+          tick.position == TickPosition.outside ? -painter.width : 0.0,
+          -painter.height);
   }
+
+  if (tick.percent < 0.95)
+    return Offset(tick.position == TickPosition.outside ? 0.0 : -painter.width,
+        tick.position == TickPosition.outside ? -painter.height : 0.0);
+  else
+    return Offset(tick.position == TickPosition.outside ? 0.0 : -painter.width,
+        -painter.height);
+}
+
+double _getLenght(TickLength length, double ringWidth) {
+  return length == TickLength.long ? ringWidth : ringWidth / 2;
 }
 
 TextPainter _makeTextPainter() => TextPainter(
       textAlign: TextAlign.center,
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.ltr,
     );

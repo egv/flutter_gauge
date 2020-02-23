@@ -63,8 +63,13 @@ class FlutterGaugeMain extends StatefulWidget {
   }
 
   @override
-  _FlutterGaugeMainState createState() => new _FlutterGaugeMainState(this.start,
-      this.end, this.highlightStart, this.highlightEnd, this.eventObservable);
+  _FlutterGaugeMainState createState() => new _FlutterGaugeMainState(
+        this.start,
+        this.end,
+        this.highlightStart,
+        this.highlightEnd,
+        this.eventObservable,
+      );
 }
 
 class _FlutterGaugeMainState extends State<FlutterGaugeMain>
@@ -117,12 +122,12 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
         child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
           final size = _getSize(constraints);
-
-          final ringWidth = size.width - widget.widthCircle;
+          final maxTickWidth = _maxOuterWidth(widget.ticks);
+          final ringWidth = size.width - widget.widthCircle - maxTickWidth;
           return Container(
             height: size.height,
             width: size.width,
-            color: Colors.amber,
+            // color: Colors.amber,
             alignment: Alignment.center,
             child: Stack(
               alignment: Alignment.bottomCenter,
@@ -131,18 +136,24 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    color: Colors.green,
+                    // color: Colors.green,
                     width: ringWidth,
                     height: ringWidth / 2,
-                    child: Stack(
-                      fit: StackFit.passthrough,
-                      children: _buildCircle(context, constraints),
-                    ),
+                    child: Stack(fit: StackFit.passthrough, children: [
+                      ..._buildCircle(context, constraints),
+                      ..._buildHand(context, constraints),
+                      ..._buildCounter(context, constraints),
+                    ]),
                   ),
                 ),
-                ..._buildGaugeText(context, constraints),
-                ..._buildHand(context, constraints),
-                ..._buildCounter(context, constraints),
+                CustomPaint(
+                  painter: GaugeTextPainter(
+                    radius: ringWidth / 2 - widget.widthCircle / 2,
+                    widthCircle: widget.widthCircle,
+                    ticks: widget.ticks,
+                  ),
+                ),
+//                ..._buildGaugeText(ringWidth / 2, context, constraints),
               ],
             ),
           );
@@ -167,73 +178,76 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
   ) =>
       [
         if (widget.counterAlign != CounterAlign.none)
-          CustomPaint(
-              painter: GaugeTextCounter(
-                  isDecimal: widget.isDecimal,
-                  start: this.start,
-                  width: min(constraints.maxHeight, constraints.maxWidth),
-                  counterAlign: widget.counterAlign,
-                  end: this.end,
-                  value: this.val,
-                  fontFamily: widget.fontFamily,
-                  textStyle: widget.counterStyle == null
-                      ? TextStyle(
-                          color: Colors.black,
-                          fontSize: 17.0,
-                          fontFamily: widget.fontFamily)
-                      : widget.counterStyle))
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(val.toStringAsFixed(2),
+                style: widget.counterStyle == null
+                    ? TextStyle(
+                        color: Colors.black,
+                        fontSize: 17.0,
+                        fontFamily: widget.fontFamily)
+                    : widget.counterStyle),
+          ),
+
+        // CustomPaint(
+        //     painter: GaugeTextCounter(
+        //         isDecimal: widget.isDecimal,
+        //         start: this.start,
+        //         width: min(constraints.maxHeight, constraints.maxWidth),
+        //         counterAlign: widget.counterAlign,
+        //         end: this.end,
+        //         value: this.val,
+        //         fontFamily: widget.fontFamily,
+        //         textStyle: widget.counterStyle == null
+        //             ? TextStyle(
+        //                 color: Colors.black,
+        //                 fontSize: 17.0,
+        //                 fontFamily: widget.fontFamily)
+        //             : widget.counterStyle))
       ];
 
   List<Widget> _buildGaugeText(
+    double r,
     BuildContext context,
     BoxConstraints constraints,
   ) =>
-      [
-        Container(
-          height: constraints.maxWidth,
-          width: constraints.maxWidth,
-          padding: EdgeInsets.all(widget.widthCircle),
-          child: CustomPaint(
-            painter: GaugeTextPainter(
-              widthCircle: widget.widthCircle,
-              ticks: widget.ticks,
-            ),
-          ),
-        )
-      ];
+      [];
 
   List<Widget> _buildHand(BuildContext context, BoxConstraints constraints) => [
-        if (!(widget.hand == Hand.none || widget.hand == Hand.short))
-          Center(
+        Center(
             child: Container(
-              width: widget.handSize,
-              height: widget.handSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: this.widget.indicatorColor,
-              ),
-            ),
+          height: constraints.maxWidth,
+          width: constraints.maxWidth,
+          padding: EdgeInsets.all(widget.hand == Hand.short
+              ? widget.widthCircle / 1.5
+              : widget.paddingHand),
+          child: new CustomPaint(
+            painter: new HandPainter(
+                shadowHand: widget.shadowHand,
+                hand: widget.hand,
+                value: val,
+                start: this.start,
+                end: this.end,
+                color: this.widget.handColor,
+                handSize: widget.handSize),
           ),
-        if (widget.hand != Hand.none)
-          Center(
-              child: Container(
-            height: constraints.maxWidth,
-            width: constraints.maxWidth,
-            padding: EdgeInsets.all(widget.hand == Hand.short
-                ? widget.widthCircle / 1.5
-                : widget.paddingHand),
-            child: new CustomPaint(
-              painter: new HandPainter(
-                  shadowHand: widget.shadowHand,
-                  hand: widget.hand,
-                  value: val,
-                  start: this.start,
-                  end: this.end,
-                  color: this.widget.handColor,
-                  handSize: widget.handSize),
-            ),
-          )),
+        )),
       ];
+}
+
+double _maxOuterWidth(List<Tick> ticks) {
+  if (ticks == null || ticks.isEmpty) {
+    return 0;
+  }
+
+  final outerTicks = ticks
+      .where((e) => e.numberInAndOut == NumberInAndOut.outside)
+      .map((e) => e.calcWidth);
+  if (outerTicks.isEmpty) {
+    return 0.0;
+  }
+
+  return outerTicks.reduce((a, b) => max(a, b));
 }
 
 Size _getSize(BoxConstraints constraints) {

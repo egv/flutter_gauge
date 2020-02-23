@@ -45,7 +45,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: FlutterGauge(
                   index: 50,
                   hand: Hand.short,
-                  ticks: Tick.allGreyNoNumbers(),
+                  ticks: Tick.testTicks(
+                    tickPosition: TickPosition.inside,
+                    textPostion: NumberInAndOut.inside,
+                  ),
                   counterStyle: TextStyle(
                     color: Colors.black,
                     fontSize: 25,
