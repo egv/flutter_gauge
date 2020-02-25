@@ -33,25 +33,17 @@ class _MyHomePageState extends State<MyHomePage> {
               index: 1,
               hand: Hand.short,
               ticks: Tick.testTicks(),
-              counterStyle: TextStyle(
-                color: Colors.black,
-                fontSize: 25,
-              ),
             ),
           ),
           Row(
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                  index: 50,
+                  index: 0.5,
                   hand: Hand.short,
                   ticks: Tick.testTicks(
                     tickPosition: TickPosition.inside,
                     textPostion: NumberInAndOut.inside,
-                  ),
-                  counterStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
                   ),
                 ),
               ),
@@ -61,16 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                    handSize: 30,
-                    width: 200,
-                    index: 50.0,
-                    fontFamily: "Iran",
-                    end: 100,
-                    ticks: Tick.allGreyNoNumbers(),
-                    counterStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 25,
-                    )),
+                  handSize: 30,
+                  width: 200,
+                  index: 0.5,
+                  fontFamily: "Iran",
+                  ticks: Tick.allGreyNoNumbers(),
+                ),
               ),
             ],
           ),
@@ -78,16 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                    handSize: 30,
-                    width: 200,
-                    index: 80.0,
-                    fontFamily: "Iran",
-                    end: 100,
-                    hand: Hand.short,
-                    counterStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 22,
-                    )),
+                  handSize: 30,
+                  width: 200,
+                  index: 0.8,
+                  fontFamily: "Iran",
+                  hand: Hand.short,
+                ),
               ),
             ],
           ),
@@ -99,17 +83,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: FlutterGauge(
                       handSize: 30,
                       width: 200,
-                      index: 65.0,
+                      index: 0.65,
                       fontFamily: "Iran",
-                      end: 400,
-                      isCircle: false,
                       hand: Hand.none,
-                      counterAlign: CounterAlign.center,
-                      counterStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 30,
-                      ),
-                      isDecimal: false,
                     )),
               ),
             ],
@@ -119,11 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                  index: 50.0,
-                  counterStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                  ),
+                  index: 0.5,
                   widthCircle: 10,
                 ),
               ),
@@ -140,16 +112,12 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                    handSize: 30,
-                    width: 200,
-                    index: 80.0,
-                    fontFamily: "Iran",
-                    end: 100,
-                    hand: Hand.short,
-                    counterStyle: TextStyle(
-                      color: Colors.black,
-                      fontSize: 22,
-                    )),
+                  handSize: 30,
+                  width: 200,
+                  index: 80.0,
+                  fontFamily: "Iran",
+                  hand: Hand.short,
+                ),
               ),
 //              Expanded(child: FlutterGauge(handSize: 30,width: 200,index: 65.0,fontFamily: "Iran",end: 500,number: Number.endAndStart,secondsMarker: SecondsMarker.minutes,isCircle: false,counterStyle: TextStyle(color: Colors.black,fontSize: 25,)),),
             ],
@@ -164,15 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       width: 200,
                       index: 0,
                       fontFamily: "Iran",
-                      end: 400,
-                      isCircle: false,
                       hand: Hand.none,
-                      counterAlign: CounterAlign.center,
-                      counterStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 30,
-                      ),
-                      isDecimal: false,
                     )),
               ),
 //              Expanded(child: FlutterGauge(width: 200,index: 67.3,fontFamily: "Iran",counterStyle: TextStyle(color: Colors.black,fontSize: 35,),numberInAndOut: NumberInAndOut.outside,counterAlign: CounterAlign.center,secondsMarker: SecondsMarker.secondsAndMinute,hand: Hand.short),),
@@ -183,11 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                  index: 50.0,
-                  counterStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                  ),
+                  index: 0.5,
                   widthCircle: 10,
                 ),
               ),
@@ -199,34 +155,22 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Expanded(
                 child: FlutterGauge(
-                  index: 50.0,
+                  index: 0.5,
                   width: 270,
-                  counterStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                  ),
                   widthCircle: 10,
                 ),
               ),
             ],
           ),
           FlutterGauge(
-              handSize: 30,
-              width: 270,
-              index: 65.0,
-              fontFamily: "Iran",
-              end: 100,
-              counterStyle: TextStyle(
-                color: Colors.black,
-                fontSize: 25,
-              )),
-          FlutterGauge(
-            index: 50.0,
+            handSize: 30,
             width: 270,
-            counterStyle: TextStyle(
-              color: Colors.black,
-              fontSize: 25,
-            ),
+            index: 0.65,
+            fontFamily: "Iran",
+          ),
+          FlutterGauge(
+            index: 0.5,
+            width: 270,
             widthCircle: 10,
           ),
         ],

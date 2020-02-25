@@ -12,16 +12,12 @@ import 'flutter_gauge.dart';
 import 'gaugetextpainter.dart';
 
 class FlutterGaugeMain extends StatefulWidget {
-  final int start;
-  final int end;
   final double highlightStart;
   final double highlightEnd;
   final String fontFamily;
   final double widthCircle;
   final PublishSubject<double> eventObservable;
-  final CounterAlign counterAlign;
   final Hand hand;
-  final bool isCircle;
   final Map isMark;
   final double handSize;
   final double shadowHand;
@@ -30,54 +26,34 @@ class FlutterGaugeMain extends StatefulWidget {
   final Color backgroundColor;
   final Color indicatorColor;
   final double paddingHand;
-  final TextStyle counterStyle;
-  final bool isDecimal;
   final List<Tick> ticks;
 
-  EdgeInsets padding;
-
   FlutterGaugeMain({
-    this.isDecimal,
-    this.counterStyle,
     this.paddingHand = 30.0,
     this.circleColor = Colors.cyan,
     this.handColor = Colors.black,
     this.backgroundColor = Colors.cyan,
     this.indicatorColor = Colors.black,
     this.shadowHand = 4.0,
-    this.counterAlign = CounterAlign.bottom,
-    this.isCircle = true,
     this.hand = Hand.long,
     this.isMark,
     this.handSize = 30,
-    this.start,
-    this.end,
     this.ticks,
     this.highlightStart,
     this.highlightEnd,
     this.eventObservable,
     @required this.fontFamily,
     @required this.widthCircle,
-  }) {
-    padding = EdgeInsets.all(widthCircle);
-  }
+  });
 
   @override
   _FlutterGaugeMainState createState() => new _FlutterGaugeMainState(
-        this.start,
-        this.end,
-        this.highlightStart,
-        this.highlightEnd,
         this.eventObservable,
       );
 }
 
 class _FlutterGaugeMainState extends State<FlutterGaugeMain>
     with TickerProviderStateMixin {
-  int start;
-  int end;
-  double highlightStart;
-  double highlightEnd;
   PublishSubject<double> eventObservable;
   double val = 0.0;
   double newVal;
@@ -90,12 +66,9 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
     super.dispose();
   }
 
-  _FlutterGaugeMainState(int start, int end, double highlightStart,
-      double highlightEnd, PublishSubject<double> eventObservable) {
-    this.start = start;
-    this.end = end;
-    this.highlightStart = highlightStart;
-    this.highlightEnd = highlightEnd;
+  _FlutterGaugeMainState(
+    PublishSubject<double> eventObservable,
+  ) {
     this.eventObservable = eventObservable;
 
     percentageAnimationController = new AnimationController(
@@ -107,7 +80,7 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
         });
       });
     subscription = this.eventObservable.listen((value) {
-      (value >= this.end) ? reloadData(this.end.toDouble()) : reloadData(value);
+      (value >= 1) ? reloadData(1.0) : reloadData(value);
     }); //(value) => reloadData(value));
   }
 
@@ -142,7 +115,6 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
                     child: Stack(fit: StackFit.passthrough, children: [
                       ..._buildCircle(context, constraints),
                       ..._buildHand(context, constraints),
-                      ..._buildCounter(context, constraints),
                     ]),
                   ),
                 ),
@@ -153,7 +125,6 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
                     ticks: widget.ticks,
                   ),
                 ),
-//                ..._buildGaugeText(ringWidth / 2, context, constraints),
               ],
             ),
           );
@@ -171,47 +142,6 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
           width: widget.widthCircle,
         )),
       ];
-
-  List<Widget> _buildCounter(
-    BuildContext context,
-    BoxConstraints constraints,
-  ) =>
-      [
-        if (widget.counterAlign != CounterAlign.none)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Text(val.toStringAsFixed(2),
-                style: widget.counterStyle == null
-                    ? TextStyle(
-                        color: Colors.black,
-                        fontSize: 17.0,
-                        fontFamily: widget.fontFamily)
-                    : widget.counterStyle),
-          ),
-
-        // CustomPaint(
-        //     painter: GaugeTextCounter(
-        //         isDecimal: widget.isDecimal,
-        //         start: this.start,
-        //         width: min(constraints.maxHeight, constraints.maxWidth),
-        //         counterAlign: widget.counterAlign,
-        //         end: this.end,
-        //         value: this.val,
-        //         fontFamily: widget.fontFamily,
-        //         textStyle: widget.counterStyle == null
-        //             ? TextStyle(
-        //                 color: Colors.black,
-        //                 fontSize: 17.0,
-        //                 fontFamily: widget.fontFamily)
-        //             : widget.counterStyle))
-      ];
-
-  List<Widget> _buildGaugeText(
-    double r,
-    BuildContext context,
-    BoxConstraints constraints,
-  ) =>
-      [];
 
   List<Widget> _buildHand(BuildContext context, BoxConstraints constraints) => [
         Center(
