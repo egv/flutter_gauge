@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: EdgeInsets.only(right: 60),
             child: FlutterGauge(
               width: MediaQuery.of(context).size.width,
-              index: 50,
+              index: 1,
               hand: Hand.short,
               ticks: Tick.testTicks(),
               counterStyle: TextStyle(
@@ -162,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: FlutterGauge(
                       handSize: 30,
                       width: 200,
-                      index: 65.0,
+                      index: 0,
                       fontFamily: "Iran",
                       end: 400,
                       isCircle: false,

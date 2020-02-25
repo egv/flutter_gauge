@@ -6,44 +6,30 @@ import 'package:flutter_gauge/flutter_gauge.dart';
 class HandPainter extends CustomPainter {
   final Paint minuteHandPaint;
   double value;
-  int start;
-  int end;
   Color color;
   double handSize;
   Hand hand;
   double shadowHand;
 
-  HandPainter(
-      {this.shadowHand,
-      this.hand,
-      this.value,
-      this.start,
-      this.end,
-      this.color,
-      this.handSize})
-      : minuteHandPaint = new Paint() {
+  HandPainter({
+    this.shadowHand,
+    this.hand,
+    this.value,
+    this.color,
+    this.handSize,
+  }) : minuteHandPaint = new Paint() {
     minuteHandPaint.color = this.color;
     minuteHandPaint.style = PaintingStyle.fill;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-//      for(int i = 0;i == 2; i++){
     var radius = size.width / 2;
-    double gamma = ((2 / 3) * this.end);
-
-    double downSizedValue =
-        ((value <= (this.end / 2)) ? value : value - (this.end / 2)) *
-            (gamma / this.end);
-    double realValue =
-        (((value <= (this.end / 2)) ? downSizedValue + gamma : downSizedValue) %
-            this.end);
-
     canvas.save();
 
     canvas.translate(radius, radius);
 
-    canvas.rotate(2 * pi * ((realValue) / this.end));
+    canvas.rotate(-pi / 2 + pi * value);
 
     Path path = new Path();
     if (hand == Hand.short) {

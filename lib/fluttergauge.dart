@@ -226,8 +226,6 @@ class _FlutterGaugeMainState extends State<FlutterGaugeMain>
                 shadowHand: widget.shadowHand,
                 hand: widget.hand,
                 value: val,
-                start: this.start,
-                end: this.end,
                 color: this.widget.handColor,
                 handSize: widget.handSize),
           ),
